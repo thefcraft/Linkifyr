@@ -60,7 +60,7 @@ class Server:
 server = Server()
 
 # WebSocket endpoint
-@app.websocket("/api_portforwardpy")
+@app.websocket("/api_portforwardpy/")
 async def websocket_endpoint(websocket: WebSocket):
     await server.handle_client(websocket)
     
