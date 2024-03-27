@@ -14,41 +14,40 @@ PAYLOAD_SIZE = struct.calcsize("Q")  # Header size which contains size of messag
 
 class Server:
     def __init__(self):
-        self.client_connected = []
-        self.ws: list[WebSocket] = []
-        self.received_data: list[asyncio.Queue] = []
-        self.client_count = 0
+        self.client_connected = False
+        self.ws = None
+        self.received_data = None
+        
     async def handle_client(self, websocket: WebSocket):
         await websocket.accept()
         
-        server.ws.append(websocket)
-        server.client_connected.append(True)
-        self.received_data.append(asyncio.Queue())
-        idx = self.client_count
-        print("Client connected IDX: ", idx)
-        self.client_count += 1
+        self.ws = websocket
+        self.client_connected = True
+        self.received_data = asyncio.Queue()
+        
         try:
             while True:
                 # RECV message
-                data = await self.ws[idx].receive_bytes()
+                data = await self.ws.receive_bytes()
                 packed_msg_size = struct.unpack("Q",data[:PAYLOAD_SIZE])[0]
                 data = data[PAYLOAD_SIZE:]
                 while len(data) < packed_msg_size:
-                    data += await self.ws[idx].receive_bytes()
-                await self.received_data[idx].put(data)
+                    data += await self.ws.receive_bytes()
+                await self.received_data.put(data)
         except WebSocketDisconnect:
             self.client_connected = False
             self.ws = None
         except Exception as e:
             print(f"Error handling client: {e}")
         finally:
+            self.received_data = asyncio.Queue()
             print('quit...')
             
-    async def recv(self, idx):
-        data = await self.received_data[idx].get()
+    async def recv(self):
+        data = await self.received_data.get()
         return pickle.loads(data)
     
-    async def send(self, data, idx):
+    async def send(self, data):
         # SEND message
         response_bytes = pickle.dumps(data)
         response_size = len(response_bytes)
@@ -56,7 +55,7 @@ class Server:
         # Send the response data in chunks
         for offset in range(0, len(message), CHUNK_SIZE):
             chunk = message[offset:offset + CHUNK_SIZE]
-            await self.ws[idx].send_bytes(chunk)
+            await self.ws.send_bytes(chunk)
 
 server = Server()
 
@@ -68,8 +67,7 @@ async def websocket_endpoint(websocket: WebSocket):
 @app.get("/{url:path}")
 @app.post("/{url:path}")
 async def forward_request(url: str, request: Request):
-    idx=0
-    if not server.client_connected[idx]:
+    if not server.client_connected:
         return JSONResponse(content={"error": "No client connected"}, status_code=400)
     else:
         data = await request.body()
@@ -78,8 +76,8 @@ async def forward_request(url: str, request: Request):
             'url': url,
             'headers': dict(request.headers),
             'data': data
-        }, idx=idx)
-        data = await server.recv(idx=idx)
+        })
+        data = await server.recv()
         
         # Create a FastAPI Response object
         fastapi_response = Response(content=data['body'], status_code=data['status'])
