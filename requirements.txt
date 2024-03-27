@@ -1,2 +1,4 @@
 Gunicorn
 aiohttp
+fastapi
+uvicorn
