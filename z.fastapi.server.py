@@ -32,9 +32,9 @@ class Server:
                 # RECV message
                 data = await self.ws[idx].receive_bytes()
                 packed_msg_size = struct.unpack("Q",data[:PAYLOAD_SIZE])[0]
+                data = data[PAYLOAD_SIZE:]
                 while len(data) < packed_msg_size:
                     data += await self.ws[idx].receive_bytes()
-                data = data[PAYLOAD_SIZE:]
                 await self.received_data[idx].put(data)
         except WebSocketDisconnect:
             self.client_connected = False
