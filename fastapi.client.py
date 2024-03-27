@@ -1,4 +1,4 @@
-import websockets
+    import websockets
 import aiohttp
 import requests
 import asyncio
@@ -9,9 +9,9 @@ import struct
 CHUNK_SIZE = 1024 * 1024 * 4  # 4 MB
 PAYLOAD_SIZE = struct.calcsize("Q")  # Header size which contains size of message
 
-PORT = 5000
+PORT = 80
 URL = f'http://127.0.0.1:{PORT}/'
-SERVER_URL = 'localhost:8080'
+SERVER_URL = 'localhost:8080' #'portforwardpy.onrender.com'#
 
 async def client_connect(url):
     print('trying to connect to server...')
