@@ -24,9 +24,9 @@ async def client_connect(url):
                 data = await ws.recv()
 
                 packed_msg_size = struct.unpack("Q",data[:PAYLOAD_SIZE])[0]
+                data = data[PAYLOAD_SIZE:]
                 while len(data) < packed_msg_size:
                     data += await ws.recv()
-                data = data[PAYLOAD_SIZE:]
                 data = pickle.loads(data)
             
             
