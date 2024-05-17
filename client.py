@@ -12,6 +12,7 @@ from rich.text import Text
 # Constants
 CHUNK_SIZE = 1024 * 1024 * 4  # 4 MB
 PAYLOAD_SIZE = struct.calcsize("Q")  # Header size which contains size of message
+USE_WSS_IF_HTTPS = False
 
 console = Console()
 status_data = {
@@ -42,6 +43,7 @@ def display_status():
     console.print(panel)
 
 async def client_connect(url, server_url, server_protocol):
+    if not str(url).endswith('/'): url += '/'
     console.print("Trying to connect to the server...", style="bold yellow")
     try:
         response = requests.get(f'{server_protocol}://{server_url}/api_get_portforwardpy')
@@ -55,8 +57,11 @@ async def client_connect(url, server_url, server_protocol):
         return
 
     console.print(f"Client ID: {client_id}", style="bold green")
-    ws_url = f"wss://{server_url}/api_portforwardpy/{client_id}" if server_protocol == 'https' else f"ws://{server_url}/api_portforwardpy/{client_id}"
-
+    if USE_WSS_IF_HTTPS:
+        ws_url = f"wss://{server_url}/api_portforwardpy/{client_id}" if server_protocol == 'https' else f"ws://{server_url}/api_portforwardpy/{client_id}"
+    else:
+        ws_url = f"ws://{server_url}/api_portforwardpy/{client_id}"
+        
     async with aiohttp.ClientSession() as session:
         async with session.ws_connect(ws_url) as ws:
             console.print("Connection established", style="bold green")
