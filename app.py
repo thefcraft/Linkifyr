@@ -18,6 +18,7 @@ app = FastAPI()
 # Constants
 CHUNK_SIZE = 1024 * 1024 * 4 # 4 MB
 PAYLOAD_SIZE = struct.calcsize("Q")  # Header size which contains size of message
+DOMAIN_DEPTH = 3 # *.dev.thefcraft.site => 3 and *.example.com => 2
 
 class Server:
     def __init__(self):
@@ -87,8 +88,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
 @app.delete("/{url:path}")
 @app.put("/{url:path}")
 async def forward_request(url: str, request: Request):
-    base_domain = '.'.join(urlparse(str(request.url)).netloc.split('.')[-2:])
-    client_id = '.'.join(urlparse(str(request.url)).netloc.split('.')[:-2])
+    # base_domain = '.'.join(urlparse(str(request.url)).netloc.split('.')[-DOMAIN_DEPTH:])
+    client_id = '.'.join(urlparse(str(request.url)).netloc.split('.')[:-DOMAIN_DEPTH])
     client = server.clients.get(client_id)
     if not client:
         return JSONResponse(content={"error": "No client connected"}, status_code=400)
@@ -114,5 +115,5 @@ async def forward_request(url: str, request: Request):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host="0.0.0.0", port=80)
     
