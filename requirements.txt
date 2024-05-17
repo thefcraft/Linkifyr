@@ -2,3 +2,4 @@ Gunicorn
 aiohttp
 fastapi
 uvicorn
+cryptography

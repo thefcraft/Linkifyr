@@ -2,23 +2,28 @@ import aiohttp
 import asyncio
 import pickle
 import struct
+import requests
 
 # Constants
 CHUNK_SIZE = 1024 * 1024 * 4  # 4 MB
 PAYLOAD_SIZE = struct.calcsize("Q")  # Header size which contains size of message
 
-PORT = 80
+PORT = 5000
 URL = f'http://127.0.0.1:{PORT}/'
-SERVER_URL = 'portforwardpy.onrender.com' # 'localhost:8080'#
+# SERVER_URL = 'portforwardpy.onrender.com' 
+SERVER_PROTOCOL = 'http'
+SERVER_URL = '127.0.0.1:8080'
 
 async def client_connect():
     print('trying to connect to server...')
-    url = f"ws://{SERVER_URL}/api_portforwardpy/"
+    client_id = requests.get(f'{SERVER_PROTOCOL}://{SERVER_URL}/api_get_portforwardpy').json()['client_id']
+    print("client_id : ", client_id)
+    url = f"ws://{SERVER_URL}/api_portforwardpy/{client_id}"
     
     async with aiohttp.ClientSession() as session:
         async with session.ws_connect(url) as ws:
             print('connection established')
-            print(f'YOUR SITE {URL} is live at {SERVER_URL}')
+            print(f'YOUR SITE {URL} is live at {SERVER_PROTOCOL}://{client_id}.{SERVER_URL}')
             
             while True: 
                 # RECV message
