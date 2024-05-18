@@ -42,13 +42,14 @@ def display_status():
     )
     console.print(panel)
 
-async def client_connect(url, server_url, server_protocol):
+async def client_connect(url, server_url, server_protocol, client_id=None):
     if not str(url).endswith('/'): url += '/'
     console.print("Trying to connect to the server...", style="bold yellow")
     try:
-        response = requests.get(f'{server_protocol}://{server_url}/api_get_portforwardpy')
-        response.raise_for_status()
-        client_id = response.json()['client_id']
+        if client_id is None:
+            response = requests.get(f'{server_protocol}://{server_url}/api_get_portforwardpy')
+            response.raise_for_status()
+            client_id = response.json()['client_id']
         status_data["forwarding"] = f"{server_protocol}://{client_id}.{server_url} -> {url}"
         status_data["session_status"] = "online"
         display_status()
@@ -94,18 +95,25 @@ async def client_connect(url, server_url, server_protocol):
                         for offset in range(0, len(message), CHUNK_SIZE):
                             chunk = message[offset:offset + CHUNK_SIZE]
                             await ws.send_bytes(chunk)
-
+                except TypeError as e:
+                    if "Received message 8:1008" in str(e):
+                        console.print(f"Client {client_id} is already established. Closing connection.", style="bold yellow")
+                        await ws.close(code=1008)
+                    else:
+                        console.print(f"Error receiving message: {e}", style="bold red")
+                    break
                 except Exception as e:
                     console.print(f"Error processing request: {e}", style="bold red")
                     break
 
 async def main(args):
-    task1 = asyncio.create_task(client_connect(args.url, args.server_url, args.server_protocol))
+    task1 = asyncio.create_task(client_connect(args.url, args.server_url, args.server_protocol, args.cid))
     await asyncio.gather(task1)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="CLI tool for a ngrok-like service")
     parser.add_argument('--url', type=str, default='http://127.0.0.1:5000/', help='The local URL to be exposed')
+    parser.add_argument('--cid', type=str, default=None, help='Force to use custom client id')
     parser.add_argument('--server_url', type=str, default='dev.thefcraft.site', help='The server URL to connect to')
     parser.add_argument('--server_protocol', type=str, choices=['http', 'https'], default='https', help='The protocol to use for server connection (http or https)')
 
