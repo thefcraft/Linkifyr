@@ -1,5 +1,5 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Response
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse, FileResponse
 import asyncio
 import pickle
 import struct
@@ -10,6 +10,8 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 import hashlib
 import secrets
+import os
+basedir = os.path.dirname(os.path.abspath(__file__))
 
 #TODO slow speed for downloading of large files as it first send full file to server then start downloading
 
@@ -26,6 +28,10 @@ class Server:
         
     async def handle_client(self, websocket: WebSocket, client_id: str):
         await websocket.accept()
+        
+        if client_id in self.clients:
+            await websocket.close(code=1008, reason=f'client_id: {client_id} is already established...')
+            return
         
         self.clients[client_id] = {
             "ws": websocket,
@@ -64,8 +70,7 @@ class Server:
 
 server = Server()
 
-@app.get("/api_get_portforwardpy")
-async def get_uuid(request: Request):
+def generate_uuid(shortuuid=True):
     idx_bytes = secrets.token_bytes(8)
     hashed_key = hashlib.sha256(idx_bytes).digest()
     padder = padding.PKCS7(algorithms.AES.block_size).padder()
@@ -74,14 +79,32 @@ async def get_uuid(request: Request):
     encryptor = cipher.encryptor()
     encrypted_idx = encryptor.update(padded_data) + encryptor.finalize()
     hex_string = ''.join(['{:02x}'.format(byte) for byte in encrypted_idx])
-    uid = uuid.UUID(f"{hex_string[:8]}-{hex_string[8:12]}-{hex_string[12:16]}-{hex_string[16:20]}-{hex_string[20:]}")
-    # uid = '127.0' # TODO TESTING
-    return JSONResponse(content={"client_id": str(uid)})
+    
+    if shortuuid:
+        uid = f"{hex_string[:4]}-{hex_string[4:6]}-{hex_string[6:8]}-{hex_string[8:12]}"
+    else:
+        uid = f"{hex_string[:8]}-{hex_string[8:12]}-{hex_string[12:16]}-{hex_string[16:20]}-{hex_string[20:]}"
+        
+    if uid in server.clients:
+        return generate_uuid(shortuuid=shortuuid)
+    else:
+        return uid
+
+@app.get("/api_get_portforwardpy")
+async def get_uuid(request: Request):
+    return JSONResponse(content={"client_id": str(generate_uuid(shortuuid=True))})
 
 # WebSocket endpoint
 @app.websocket("/api_portforwardpy/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: str):
     await server.handle_client(websocket, client_id)
+    
+def homepage(url: str, request: Request):
+    if url == 'assets/favicon.png':
+        return FileResponse(os.path.join(basedir, 'assets/favicon.png'))
+    elif url == 'assets/demo.png':
+        return FileResponse(os.path.join(basedir, 'assets/demo.png'))
+    return FileResponse(os.path.join(basedir, 'templates/index.html'))
 
 @app.get("/{url:path}")
 @app.post("/{url:path}")
@@ -90,6 +113,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
 async def forward_request(url: str, request: Request):
     # base_domain = '.'.join(urlparse(str(request.url)).netloc.split('.')[-DOMAIN_DEPTH:])
     client_id = '.'.join(urlparse(str(request.url)).netloc.split('.')[:-DOMAIN_DEPTH])
+    if not client_id: return homepage(url, request)
     client = server.clients.get(client_id)
     if not client:
         return JSONResponse(content={"error": "No client connected"}, status_code=400)

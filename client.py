@@ -26,7 +26,7 @@ status_data = {
 }
 
 def display_status():
-    console.clear()
+    # console.clear()
     panel = Panel(
         Text.from_markup(
             f"[bold cyan]Session Status:[/bold cyan] {status_data['session_status']}\n"
@@ -37,7 +37,7 @@ def display_status():
             f"[bold cyan]Web Interface:[/bold cyan] {status_data['web_interface']}\n"
             f"[bold cyan]Forwarding:[/bold cyan] {status_data['forwarding']}"
         ),
-        title="Ngrok-like Tunnel",
+        title="Linkifyr Tunnel",
         border_style="bold green"
     )
     console.print(panel)
