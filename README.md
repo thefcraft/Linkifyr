@@ -2,6 +2,12 @@
 
 This project implements a tunnel service similar to Ngrok, allowing users to expose their local servers to the internet securely. The implementation consists of a client-side application (`client.py`) and a server-side application (`app.py`) using FastAPI for handling WebSocket connections and HTTP requests.
 
+## Download
+
+[linkifyr.exe](https://github.com/thefcraft/Linkifyr/releases/download/v1.0.0/linkifyr.exe)
+
+to run open cmd and `./linkifyr.exe --url http://127.0.0.1:5000/`
+
 ## Features
 
 - Dynamic urls like https://{client_id}.dev.thefcraft.site
