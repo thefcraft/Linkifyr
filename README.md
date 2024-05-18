@@ -1,60 +1,114 @@
-**Repository Name:** PortForwardPy
+# Ngrok-like Tunnel
 
-ignore readme//
+This project implements a tunnel service similar to Ngrok, allowing users to expose their local servers to the internet securely. The implementation consists of a client-side application (`client.py`) and a server-side application (`app.py`) using FastAPI for handling WebSocket connections and HTTP requests.
 
-DEMO:- https://www.instagram.com/reel/C4-0683IlWA/?igsh=Nmc1enJybzlnM3Yx
+## Features
 
-**Description:**
-PortForwardPy is a Python script that enables port forwarding functionality. It allows users to forward network traffic from one port to another, facilitating various network-related tasks such as proxying, tunneling, and redirecting traffic between different hosts or processes.
+- Dynamic urls like https://{client_id}.dev.thefcraft.site
+- Securely exposes local servers to the internet.
+- Handles HTTP/HTTPS requests and forwards them to the local server.
+- Displays connection status and information using Rich for a better CLI experience.
 
-**Features:**
-- Simple and easy-to-use Python script.
-- Supports forwarding TCP traffic between specified ports.
-- Can be used for various network-related tasks, including proxying and tunneling.
-- Customizable configuration options.
-- Lightweight and efficient.
+## DEMO
+```bash
+python client.py --url http://127.0.0.1:5000/
+```
+```bash
+╭─────────────────────────────────────────────────────── Ngrok-like Tunnel ────────────────────────────────────────────────────────╮
+│ Session Status: online                                                                                                           │
+│ Account: User                                                                                                                    │
+│ Version: 1.0.0                                                                                                                   │
+│ Region: Unknown                                                                                                                  │
+│ Latency: Unknown                                                                                                                 │
+│ Web Interface: Under development                                                                                                 │
+│ Forwarding: https://2cae1c16-b0c8-d7e9-1171-2a306fb997a7.dev.thefcraft.site -> http://127.0.0.1:5000/                            │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+Client ID: 2cae1c16-b0c8-d7e9-1171-2a306fb997a7
+Connection established
+Your site http://127.0.0.1:5000/ is live at https://2cae1c16-b0c8-d7e9-1171-2a306fb997a7.dev.thefcraft.site
+```
 
-**Usage:**
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your_username/PortForwardPy.git
-   ```
+## Getting Started
 
-2. Navigate to the repository directory:
-   ```bash
-   cd PortForwardPy
-   ```
+### Prerequisites
 
-3. Modify the configuration in the `config.json` file to specify the source and destination ports.
+- Python 3.7+
+- `aiohttp`
+- `requests`
+- `fastapi`
+- `uvicorn`
+- `rich`
+- `cryptography`
 
-4. Run the script:
-   ```bash
-   python port_forward.py
-   ```
+Install the required packages using pip:
 
-**Configuration:**
-The `config.json` file contains the configuration options for the port forwarding settings. You can specify the following parameters:
-- `source_port`: The source port from which traffic will be forwarded.
-- `destination_address`: The destination address to which traffic will be forwarded.
-- `destination_port`: The destination port to which traffic will be forwarded.
+```bash
+pip install aiohttp requests fastapi uvicorn rich cryptography
+```
 
-**Contributing:**
-Contributions to PortForwardPy are welcome! If you find any bugs or have suggestions for new features, feel free to open an issue or submit a pull request.
+### Client-Side Application
 
-**License:**
-This project is licensed under the MIT License. See the LICENSE file for more details.
+The client-side application (`client.py`) connects to the server, retrieves a unique client ID, and establishes a WebSocket connection for forwarding requests.
 
-**Author:**
-[Your Name] ([Your GitHub Profile](https://github.com/your_username))
+#### Usage
 
-**Contact:**
-For any inquiries or support, please contact [your_email@example.com].
+Run the client-side application with the following command:
 
-**Acknowledgments:**
-- Special thanks to [mention any contributors or libraries used].
+```bash
+python client.py --url http://127.0.0.1:5000/ --server_url dev.thefcraft.site --server_protocol https
+```
 
-**Disclaimer:**
-This project is provided as-is, without any warranties or guarantees. Use it at your own risk.
+#### Arguments
 
-**Note:**
-Make sure to replace placeholders such as `[Your Name]`, `[your_username]`, `[your_email@example.com]`, and `[Your GitHub Profile]` with appropriate information before publishing the README on GitHub.
+- `--url`: The local URL to be exposed (default: `http://127.0.0.1:5000/`).
+- `--server_url`: The server URL to connect to (default: `dev.thefcraft.site`).
+- `--server_protocol`: The protocol to use for server connection (`http` or `https`, default: `https`).
+
+### Server-Side Application
+
+The server-side application (`app.py`) uses FastAPI to handle incoming WebSocket connections and HTTP requests, forwarding them to the appropriate client.
+
+#### Running the Server
+
+Run the server-side application with the following command:
+
+```bash
+uvicorn app:app --host 0.0.0.0 --port 8080
+```
+
+#### dns config
+
+use [wildcard domain](https://developers.cloudflare.com/dns/manage-dns-records/reference/wildcard-dns-records/)
+
+[adding a wildcard custom domain](https://docs.render.com/custom-domains#adding-a-wildcard-custom-domain) on onrender
+
+### Workflow
+
+1. **Client Connection**: The client connects to the server and retrieves a unique client ID.
+2. **WebSocket Connection**: The client establishes a WebSocket connection using the retrieved client ID.
+3. **Request Forwarding**: The server forwards incoming HTTP requests to the connected client, which processes them and returns the response.
+
+## Project Structure
+
+```
+.
+├── client.py
+├── app.py
+└── README.md
+```
+
+- `client.py`: Contains the client-side logic for connecting to the server and forwarding requests.
+- `app.py`: Contains the server-side logic for handling WebSocket connections and HTTP requests.
+- `README.md`: Project documentation.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- [Ngrok](https://ngrok.com/) for the inspiration.
+- [FastAPI](https://fastapi.tiangolo.com/) for the excellent web framework.
+- [Rich](https://github.com/Textualize/rich) for the beautiful CLI components.
+
+For more details, visit the [GitHub repository](https://github.com/thefcraft/PortForwardPy).
