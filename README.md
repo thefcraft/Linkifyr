@@ -1,4 +1,4 @@
-# Ngrok-like Tunnel
+# Linkifyr Tunnel
 
 This project implements a tunnel service similar to Ngrok, allowing users to expose their local servers to the internet securely. The implementation consists of a client-side application (`client.py`) and a server-side application (`app.py`) using FastAPI for handling WebSocket connections and HTTP requests.
 
@@ -14,18 +14,18 @@ This project implements a tunnel service similar to Ngrok, allowing users to exp
 python client.py --url http://127.0.0.1:5000/
 ```
 ```bash
-╭─────────────────────────────────────────────────────── Ngrok-like Tunnel ────────────────────────────────────────────────────────╮
+╭─────────────────────────────────────────────────────── Linkifyr Tunnel ──────────────────────────────────────────────────────────╮
 │ Session Status: online                                                                                                           │
 │ Account: User                                                                                                                    │
 │ Version: 1.0.0                                                                                                                   │
 │ Region: Unknown                                                                                                                  │
 │ Latency: Unknown                                                                                                                 │
 │ Web Interface: Under development                                                                                                 │
-│ Forwarding: https://2cae1c16-b0c8-d7e9-1171-2a306fb997a7.dev.thefcraft.site -> http://127.0.0.1:5000/                            │
+│ Forwarding: https://62dc-f9-d0-9f65.dev.thefcraft.site -> http://127.0.0.1:5000/                                                 │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-Client ID: 2cae1c16-b0c8-d7e9-1171-2a306fb997a7
+Client ID: 62dc-f9-d0-9f65
 Connection established
-Your site http://127.0.0.1:5000/ is live at https://2cae1c16-b0c8-d7e9-1171-2a306fb997a7.dev.thefcraft.site
+Your site http://127.0.0.1:5000/ is live at https://62dc-f9-d0-9f65.dev.thefcraft.site
 ```
 
 ## Getting Started
