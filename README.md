@@ -6,11 +6,11 @@ This project implements a tunnel service similar to Ngrok, allowing users to exp
 
 [linkifyr.exe](https://github.com/thefcraft/Linkifyr/releases/download/v1.0.0/linkifyr.exe)
 
-to run open cmd and `./linkifyr.exe --url http://127.0.0.1:5000/`
+to run open cmd and `./linkifyr.exe --url http://127.0.0.1:5000/` --server_url linkifyr.thefcraft.site --server_protocol https
 
 ## Features
 
-- Dynamic urls like https://{client_id}.dev.thefcraft.site
+- Dynamic urls like https://{client_id}.linkifyr.thefcraft.site
 - Securely exposes local servers to the internet.
 - Handles HTTP/HTTPS requests and forwards them to the local server.
 - Displays connection status and information using Rich for a better CLI experience.
@@ -31,7 +31,7 @@ python client.py --url http://127.0.0.1:5000/
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 Client ID: 62dc-f9-d0-9f65
 Connection established
-Your site http://127.0.0.1:5000/ is live at https://62dc-f9-d0-9f65.dev.thefcraft.site
+Your site http://127.0.0.1:5000/ is live at https://62dc-f9-d0-9f65.linkifyr.thefcraft.site
 ```
 
 ## Getting Started
@@ -61,7 +61,7 @@ The client-side application (`client.py`) connects to the server, retrieves a un
 Run the client-side application with the following command:
 
 ```bash
-python client.py --url http://127.0.0.1:5000/ --server_url dev.thefcraft.site --server_protocol https
+python client.py --url http://127.0.0.1:5000/ --server_url Ilinkifyr.thefcraft.site --server_protocol https
 ```
 
 #### Arguments
